@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <% include partition/header %>
+</head>
+
+<body>
+    <div id="viewer" class="viewer"></div>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.178.0/build/three.module.min.js",
+                "three/examples/jsm/loaders/MTLLoader.js": "https://cdn.jsdelivr.net/npm/three@0.178.0/examples/jsm/loaders/MTLLoader.js",
+                "three/examples/jsm/loaders/OBJLoader.js": "https://cdn.jsdelivr.net/npm/three@0.178.0/examples/jsm/loaders/OBJLoader.js",
+                "three/examples/jsm/loaders/GLTFLoader.js": "https://cdn.jsdelivr.net/npm/three@0.178.0/examples/jsm/loaders/GLTFLoader.js",
+                "three/examples/jsm/controls/OrbitControls.js": "https://cdn.jsdelivr.net/npm/three@0.178.0/examples/jsm/controls/OrbitControls.js",
+                "three/examples/jsm/controls/TrackballControls.js": "https://cdn.jsdelivr.net/npm/three@0.178.0/examples/jsm/controls/TrackballControls.js"
+            }
+        }
+    </script>
+
+    <script type="module">
+        import { prepareScene, loadGlb } from '/js/js-3d-model-viewer.js';
+        const viewerElement = document.getElementById('viewer')
+        const opts = {
+            trackball: false,
+            background: '#000000'
+        }
+        const scene = prepareScene(viewerElement, opts)
+        loadGlb(scene, '/assets/<%= file %>') // Urls are fine here.
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <% include partition/header %>
+    <style>
+        .Hotspot {
+            background-color: #ffffff;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+        }
+        .HotspotAnnotation {
+            background-color: #ffffffdd;
+            color: #000;
+            padding: 5px;
+            font-size: 50px;
+            transform: translate(25px, -20px);
+            position: absolute;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@babylonjs/viewer@8.19.1/dist/babylon-viewer.esm.min.js"></script>
+    <babylon-viewer source="/assets/<%= file %>" environment="auto" class="viewer"
+        <% if(file == 'glare.glb'){ %>
+        hotspots='{
+            "Head": {
+                "type": "surface",
+                "meshIndex": 1,
+                "pointIndex": [20, 22, 21],
+                "barycentric": [0.157, 0.284, 0.559]
+            },
+            "Body": {
+                "type": "surface",
+                "meshIndex": 14,
+                "pointIndex": [22, 23, 21],
+                "barycentric": [0.221, 0.601, 0.178]
+            }
+        }'
+        <% } %>
+    >
+        <% if(file == 'glare.glb'){ %>
+        <babylon-viewer-annotation hotSpot="Head">
+            <div class="Hotspot">
+                <div class="HotspotAnnotation">Head</div>
+            </div>
+        </babylon-viewer-annotation>
+        <babylon-viewer-annotation hotSpot="Body">
+            <div class="Hotspot">
+                <div class="HotspotAnnotation">Body</div>
+            </div>
+        </babylon-viewer-annotation>
+        <% } %>
+    </babylon-viewer>
+</body>
+
+</html>

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <% include partition/header %>
+</head>
+
+<body>
+    <div id="viewer" class="viewer"></div>
+    <script src="https://cdn.jsdelivr.net/npm/js-3d-model-viewer@0.2.2/dist/js-3d-model-viewer.min.js"></script>
+    <script type="module">
+        const viewerElement = document.getElementById('viewer');
+        const opts = {
+            background: '#000'
+        };
+        const scene = Js3dModelViewer.prepareScene(viewerElement, opts);
+        Js3dModelViewer.loadGlb(scene, '/assets/<%= file %>');
+    </script>
+</body>
+
+</html>
