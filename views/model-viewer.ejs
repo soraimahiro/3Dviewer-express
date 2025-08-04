@@ -215,13 +215,35 @@
             modelViewer.animationName = event.target.value === 'default' ? null : event.target.value;
         });
 
-        document.getElementById('downloadDataURL').addEventListener('click', () => {
-            const url = modelViewer.toDataURL();
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = "model.png";
-            a.click();
-            URL.revokeObjectURL(url);
+        document.getElementById('downloadDataURL').addEventListener('click', async () => {
+            try {
+                const url = modelViewer.toDataURL();
+                
+                // Send to server
+                const response = await fetch('/save-screenshot', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        imageData: url,
+                        filename: `model-${new Date().getTime()}.png`
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert(`截圖已儲存至伺服器: ${result.filename}`);
+                } else {
+                    alert('儲存截圖失敗: ' + result.message);
+                }
+                
+                URL.revokeObjectURL(url);
+            } catch (error) {
+                console.error('Error saving screenshot:', error);
+                alert('儲存截圖時發生錯誤');
+            }
         });
         document.getElementById('reset').addEventListener('click', async () => {
             await modelViewer.pause();
