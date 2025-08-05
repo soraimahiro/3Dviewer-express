@@ -1,22 +1,56 @@
 import express from 'express';
 import fs from 'fs';
 import path from 'path';
+import { dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 const router = express.Router();
 
 /* GET home page. */
 router.get('/', function (req, res, next) {
-    res.render('index', { title: '3D model viewer demo' });
+    res.render('index');
 });
 
 router.get('/:viewer', function (req, res, next) {
     const viewer = req.params.viewer;
     const file = 'cube.glb';
+    
+    // Check if viewer template exists
+    const viewPath = path.join(__dirname, '../views', `${viewer}.ejs`);
+    if (!fs.existsSync(viewPath)) {
+        return res.status(404).render('error', { 
+            message: `Viewer '${viewer}' not found`,
+            error: { status: 404 }
+        });
+    }
+    
     res.render(viewer, { title: viewer, file: file });
 });
 
 router.get('/:viewer/:file', function (req, res, next) {
     const viewer = req.params.viewer;
     const file = req.params.file;
+    
+    // Check if viewer template exists
+    const viewPath = path.join(__dirname, '../views', `${viewer}.ejs`);
+    if (!fs.existsSync(viewPath)) {
+        return res.status(404).render('error', { 
+            message: `Viewer '${viewer}' not found`,
+            error: { status: 404 }
+        });
+    }
+    
+    // Check if file exists
+    const filePath = path.join(__dirname, '../public/assets', file);
+    if (!fs.existsSync(filePath)) {
+        return res.status(404).render('error', { 
+            message: `File '${file}' not found`,
+            error: { status: 404 }
+        });
+    }
+    
     res.render(viewer, { title: viewer, file: file });
 });
 
