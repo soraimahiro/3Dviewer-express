@@ -22,7 +22,7 @@
             gap: 12px;
         }
 
-        .toolbar > div {
+        .toolbar>div {
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -117,7 +117,10 @@
 
 <body>
     <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.1.0/model-viewer.min.js"></script>
-    <model-viewer src="/assets/<%= file %>" ar ar-modes="webxr scene-viewer quick-look" camera-controls interaction-prompt="none" class="viewer" max-field-of-view="45deg" disable-tap id="model-viewer">
+    <model-viewer id="model-viewer" class="viewer" src="/assets/<%= file %>" 
+        ar ar-modes="webxr scene-viewer quick-look"
+        camera-controls interaction-prompt="none" max-field-of-view="45deg" disable-tap
+        environment-image="/images/white.jpg">
         <div class="toolbar">
             <div>
                 <button id="play" style="width: 5em;"></button>
@@ -126,64 +129,68 @@
             </div>
             <div id="animate-div"><span>animate: </span><select id="animate"></select></div>
             <div id="variant-div"><span>variant: </span><select id="variant"></select></div>
-            <div id="exposure-div"><span>exposure: </span><input type="number" id="exposure" value="1.0" step="0.1" min="0" ></div>
+            <div id="exposure-div"><span>exposure: </span><input type="number" id="exposure" value="1.0" step="0.1"
+                    min="0"></div>
             <div id="background-div"><span>background: </span><input type="checkbox"></div>
-            <!-- <button id="downloadBlob">Download blob picture</button> -->
         </div>
-        <% if(file == 'glare.glb'){ %>
-        <div class="Hotspot" slot="hotspot-1" data-surface="0 0 20 22 21 0.095 0.326 0.579" data-visibility-attribute="visible">
-            <div class="HotspotAnnotation">
-                Head
+        <% if(file=='glare.glb' ){ %>
+            <div class="Hotspot" slot="hotspot-1" data-surface="0 0 20 22 21 0.095 0.326 0.579"
+                data-visibility-attribute="visible">
+                <div class="HotspotAnnotation">
+                    Head
+                </div>
             </div>
-        </div>
-        <div class="Hotspot" slot="hotspot-2" data-surface="12 0 22 23 21 0.397 0.397 0.206" data-visibility-attribute="visible">
-            <div class="HotspotAnnotation">
-                Body
+            <div class="Hotspot" slot="hotspot-2" data-surface="12 0 22 23 21 0.397 0.397 0.206"
+                data-visibility-attribute="visible">
+                <div class="HotspotAnnotation">
+                    Body
+                </div>
             </div>
-        </div>
         <% } %>
     </model-viewer>
     <script>
         const modelViewer = document.getElementById('model-viewer');
         const playButton = document.getElementById('play');
-        const variantSelect = document.querySelector('#variant');
-        const animateSelect = document.querySelector('#animate');
+        const variantDiv = document.querySelector('#variant-div');
+        const animateDiv = document.querySelector('#animate-div');
         const backgroundDiv = document.querySelector('#background-div');
 
-        modelViewer.addEventListener('load', () => {
-            const animations = modelViewer.availableAnimations;
+        modelViewer.addEventListener('load', async () => {
             const variants = modelViewer.availableVariants;
-            console.log('Available animations:', animations);
-            console.log('Available variants:', variants);
-            if(variants.length > 0) {
+            if (variants.length > 0) {
                 for (const name of variants) {
                     const option = document.createElement('option');
                     option.value = name;
                     option.textContent = name;
-                    variantSelect.appendChild(option);
+                    variantDiv.querySelector('select').appendChild(option);
                 }
-            } 
-            else {
-                document.querySelector('#variant-div').style.display = 'none';
             }
-            if(animations.length > 0) {
-                animateSelect.style.display = 'inline-block';
+            else {
+                variantDiv.style.display = 'none';
+            }
+
+            const animations = modelViewer.availableAnimations;
+            if (animations.length > 0) {
                 for (const name of animations) {
                     const option = document.createElement('option');
                     option.value = name;
                     option.textContent = name;
-                    animateSelect.appendChild(option);
+                    animateDiv.querySelector('select').appendChild(option);
                 }
                 modelViewer.pause();
                 playButton.innerText = 'Play';
                 modelViewer.currentTime = 0;
-            } 
-            else {
-                document.querySelector('#animate-div').style.display = 'none';
-                document.querySelector('#play').style.display = 'none';
             }
-            console.log('skybox-image: ', modelViewer.skyboxImage);
-            backgroundDiv.querySelector('input').checked = modelViewer.skyboxImage? true : false;
+            else {
+                animateDiv.style.display = 'none';
+                playButton.style.display = 'none';
+            }
+
+            backgroundDiv.querySelector('input').checked = modelViewer.skyboxImage ? true : false;
+            // modelViewer.exposure = 1.0;
+            document.querySelector('#exposure').value = modelViewer.exposure;
+            await reset();
+
             document.querySelector('.toolbar').style.visibility = 'visible';
         });
 
@@ -191,23 +198,24 @@
             if (modelViewer.paused) {
                 modelViewer.play();
                 playButton.innerText = 'Pause';
-            } else {
+            }
+            else {
                 modelViewer.pause();
                 playButton.innerText = 'Play';
             }
         });
 
-        variantSelect.addEventListener('input', (event) => {
+        variantDiv.querySelector('select').addEventListener('input', (event) => {
             modelViewer.variantName = event.target.value === 'default' ? null : event.target.value;
         });
-        animateSelect.addEventListener('input', (event) => {
+        animateDiv.querySelector('select').addEventListener('input', (event) => {
             modelViewer.animationName = event.target.value === 'default' ? null : event.target.value;
         });
 
         document.getElementById('downloadDataURL').addEventListener('click', async () => {
             try {
                 const url = modelViewer.toDataURL();
-                
+
                 // Send to server
                 const response = await fetch('/save-screenshot', {
                     method: 'POST',
@@ -219,46 +227,45 @@
                         filename: `model-${new Date().getTime()}.png`
                     })
                 });
-                
+
                 const result = await response.json();
-                
+
                 if (result.success) {
-                    alert(`截圖已儲存至伺服器: ${result.filename}`);
+                    alert(`screenshot saved: ${result.filename}`);
                 } else {
-                    alert('儲存截圖失敗: ' + result.message);
+                    alert('Failed to save screenshot: ' + result.message);
                 }
-                
+
                 URL.revokeObjectURL(url);
             } catch (error) {
                 console.error('Error saving screenshot:', error);
-                alert('儲存截圖時發生錯誤');
+                alert('Error saving screenshot');
             }
         });
-        document.getElementById('reset').addEventListener('click', async () => {
-            await modelViewer.pause();
-            await (modelViewer.currentTime = 0);
-            playButton.innerText = 'Play';
-            await (modelViewer.orientation = "0deg 0deg 0deg");
-            await (modelViewer.scale = "1 1 1");
-            await modelViewer.updateFraming();
-            modelViewer.cameraOrbit = modelViewer.cameraOrbit;
-        });
-        
-        modelViewer.addEventListener('progress', (event) => {
-            console.log(event.detail.totalProgress)
-        });
+        document.getElementById('reset').addEventListener('click', reset);
+
         document.getElementById('exposure').addEventListener('input', (event) => {
-            console.log(event.target.value);
             modelViewer.exposure = parseFloat(event.target.value);
         });
         backgroundDiv.querySelector('input').addEventListener('change', (event) => {
             if (event.target.checked) {
                 modelViewer.skyboxImage = '/images/background.jpg';
-            } 
+            }
             else {
                 modelViewer.skyboxImage = '';
             }
         });
+
+        async function reset() {
+            await modelViewer.pause();
+            await (modelViewer.currentTime = 0);
+            playButton.innerText = 'Play';
+
+            await (modelViewer.orientation = "0deg 0deg 0deg");
+            await (modelViewer.scale = "1 1 1");
+            await modelViewer.updateFraming();
+            modelViewer.cameraOrbit = modelViewer.cameraOrbit;
+        }
     </script>
 </body>
 
