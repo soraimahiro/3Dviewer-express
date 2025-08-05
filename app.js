@@ -1,13 +1,16 @@
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
-var fs = require('fs');
+import createError from 'http-errors';
+import express from 'express';
+import path, { dirname } from 'path';
+import { fileURLToPath } from 'url';
+import cookieParser from 'cookie-parser';
+import logger from 'morgan';
+import fs from 'fs';
 
-var indexRouter = require('./routes/index');
+import indexRouter from './routes/index.js';
 
-var app = express();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const app = express();
 
 // Clear screenshots folder on startup
 function clearScreenshotsFolder() {
@@ -39,6 +42,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// ...existing middleware...
 app.use('/', indexRouter);
 
 // catch 404 and forward to error handler
@@ -57,4 +61,4 @@ app.use(function (err, req, res, next) {
     res.render('error');
 });
 
-module.exports = app;
+export default app;

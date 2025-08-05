@@ -4,9 +4,10 @@
  * Module dependencies.
  */
 
-var app = require('../app');
-var debug = require('debug')('3d-viewer-express:server');
-var http = require('http');
+import app from '../app.js';
+import createDebug from 'debug';
+import http from 'http';
+const debug = createDebug('3d-viewer-express:server');
 
 /**
  * Get port from environment and store in Express.
